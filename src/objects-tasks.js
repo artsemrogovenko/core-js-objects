@@ -33,7 +33,21 @@ function shallowCopy(obj) {
  *    mergeObjects([]) => {}
  */
 function mergeObjects(objects) {
-  throw new Error('Not implemented');
+  if(objects.length===0){
+    return {};
+  }
+   const merged = Object.assign({},objects[0]);
+  if(objects.length===1){
+    return merged;
+  }
+  Object.entries(objects[1]).forEach(([key,value])=>{
+    if(Object.hasOwn(merged,key)){
+      merged[key]= merged[key]+value;
+    }else{
+      merged[key]= value;
+    }
+  })
+  return merged;
 }
 
 /**
@@ -49,8 +63,13 @@ function mergeObjects(objects) {
  *    removeProperties({name: 'John', age: 30, city: 'New York'}, ['age']) => {name: 'John', city: 'New York'}
  *
  */
-function removeProperties(/* obj, keys */) {
-  throw new Error('Not implemented');
+function removeProperties(obj, keys) {
+  Object.keys(obj).forEach(key=>{
+    if(keys.includes(key)){
+      delete obj[key];
+    }
+  })
+  return obj;
 }
 
 /**
@@ -85,8 +104,8 @@ function compareObjects(obj1, obj2) {
  *    isEmptyObject({}) => true
  *    isEmptyObject({a: 1}) => false
  */
-function isEmptyObject(/* obj */) {
-  throw new Error('Not implemented');
+function isEmptyObject(obj) {
+  return Object.keys(obj).length === 0;
 }
 
 /**
@@ -105,8 +124,8 @@ function isEmptyObject(/* obj */) {
  *    immutableObj.newProp = 'new';
  *    console.log(immutableObj) => {a: 1, b: 2}
  */
-function makeImmutable(/* obj */) {
-  throw new Error('Not implemented');
+function makeImmutable(obj) {
+  return Object.freeze(obj);
 }
 
 /**
@@ -146,8 +165,44 @@ function makeWord(lettersObject) {
  *    sellTickets([25, 25, 50]) => true
  *    sellTickets([25, 100]) => false (The seller does not have enough money to give change.)
  */
-function sellTickets(/* queue */) {
-  throw new Error('Not implemented');
+function sellTickets(queue) {
+  const moneyCash = {"25":0,"50":0,"100":0};
+  const ticketCost="25";
+  let result = true;
+if(queue[0]>ticketCost){
+  return false;
+}
+  for (let op=0; op<queue.length; op++) {
+    const pay = queue[op].toString();
+    if(op===0&& pay===ticketCost){
+moneyCash[pay]=moneyCash[pay]+1;
+    }else{
+        if( pay==="25") {moneyCash[pay]=moneyCash[pay]+1;}
+          if(pay=== "50") {if (moneyCash["25"]===0) { result=false; break }else{moneyCash["25"]=moneyCash["25"]-1; moneyCash["50"]=moneyCash["50"]+1;} };
+          if(pay=== "100") {
+            if (moneyCash["50"] === 0) {
+              if (moneyCash["25"] < 3) {
+                result=false;
+                break ;
+              } else {
+                if (moneyCash["25"] >= 3) {
+                  moneyCash["25"] = moneyCash["25"] - 3;
+                  moneyCash["100"] = moneyCash["100"] + 1;
+                }
+              }
+            }else{
+              if (moneyCash["25"]<1) {
+                result=false;
+                break ;
+            }else{
+              moneyCash["50"]=moneyCash["50"]-1;
+              moneyCash["25"]=moneyCash["25"]-2;
+            }
+          }
+    }
+  }
+}
+return result;
 }
 
 /**
