@@ -373,33 +373,86 @@ function group(/* array, keySelector, valueSelector */) {
  */
 
 const cssSelectorBuilder = {
-  element(/* value */) {
-    throw new Error('Not implemented');
+  elemThrow(){throw Error("Element, id and pseudo-element should not occur more then one time inside the selector")},
+  selThrow(){throw  Error("Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element")},
+
+  element(value) {
+    if(this.valuePrev === "element"){
+      this.elemThrow();
+    }
+    if(this.valuePrev === "id"||this.valuePrev=== "pseudoElement"){
+      this.selThrow();
+    }
+    this._element=[`${value}`];
+    this.valuePrev="element";
+    return this;
   },
 
-  id(/* value */) {
-    throw new Error('Not implemented');
+  id(value) {
+    if(this.valuePrev === "id"){
+      this.elemThrow();
+    }
+    if(this.valuePrev === "class"||this.valuePrev==="pseudoElement"){
+      this.selThrow();
+    }
+    this._id=[`#${value}`];
+    this.valuePrev="id";
+    return this;
   },
 
-  class(/* value */) {
-    throw new Error('Not implemented');
+  class(value) {
+    if(this.valuePrev === "attr"){
+      this.selThrow();
+    }
+    Object.hasOwn(this,'_class') ? this._class.push(`.${value}`): this._class=[`.${value}`];
+    this.valuePrev="class";
+    return this;
   },
 
-  attr(/* value */) {
-    throw new Error('Not implemented');
+  attr(value) {
+    if(this.valuePrev === "pseudoClass"){
+      this.selThrow();
+    }
+    Object.hasOwn(this,'_attr') ? this._attr.push(`[${value}]`): this._attr=[`[${value}]`];
+    this.valuePrev="attr";
+    return this;
   },
 
-  pseudoClass(/* value */) {
-    throw new Error('Not implemented');
+  pseudoClass(value) {
+    if(this.valuePrev === "pseudoElement"){
+      this.selThrow();
+    }
+    Object.hasOwn(this,'_pseudoClass') ? this._pseudoClass.push(`:${value}`): this._pseudoClass=[`:${value}`];
+    this.valuePrev="pseudoClass";
+    return this;
   },
 
-  pseudoElement(/* value */) {
-    throw new Error('Not implemented');
+  pseudoElement(value) {
+    if(this.valuePrev === "pseudoElement"){
+      this.elemThrow();
+    }
+    this._pseudoElement=[`::${value}`];
+    this.valuePrev ="pseudoElement";
+    return this;
   },
 
   combine(/* selector1, combinator, selector2 */) {
     throw new Error('Not implemented');
   },
+
+  stringify(){
+    const arrayValues= [];
+    Object.entries(this).forEach(([key,value])=>{
+      if (typeof value !== "function" && value!==null && key!=="valuePrev"){
+        console.log(value);
+        arrayValues.push(value.join(''));
+        delete this[key];
+      }
+    });
+    this.valuePrev=null;
+    const result = arrayValues.join('');
+    return result;
+  }
 };
 
 module.exports = {
