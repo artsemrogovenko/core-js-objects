@@ -250,8 +250,9 @@ function getJSON(obj) {
  *
  */
 function fromJSON(proto, json) {
-  const parsed = Object.assign( JSON.parse(json));
-  throw new Error('Not implemented');
+  const parsed = JSON.parse(json);
+  Object.setPrototypeOf(parsed,proto);
+  return parsed;
 }
 
 /**
@@ -375,6 +376,8 @@ function group(/* array, keySelector, valueSelector */) {
 const cssSelectorBuilder = {
   elemThrow(){throw Error("Element, id and pseudo-element should not occur more then one time inside the selector")},
   selThrow(){throw  Error("Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element")},
+  memory:{},
+  _str: null,
 
   element(value) {
     if(this.valuePrev === "element"){
@@ -383,7 +386,7 @@ const cssSelectorBuilder = {
     if(this.valuePrev === "id"||this.valuePrev=== "pseudoElement"){
       this.selThrow();
     }
-    this._element=[`${value}`];
+    this.memory._element=[`${value}`];
     this.valuePrev="element";
     return this;
   },
@@ -395,7 +398,7 @@ const cssSelectorBuilder = {
     if(this.valuePrev === "class"||this.valuePrev==="pseudoElement"){
       this.selThrow();
     }
-    this._id=[`#${value}`];
+    this.memory._id=[`#${value}`];
     this.valuePrev="id";
     return this;
   },
@@ -404,7 +407,7 @@ const cssSelectorBuilder = {
     if(this.valuePrev === "attr"){
       this.selThrow();
     }
-    Object.hasOwn(this,'_class') ? this._class.push(`.${value}`): this._class=[`.${value}`];
+    Object.hasOwn(this.memory,'_class') ? this.memory._class.push(`.${value}`): this.memory._class=[`.${value}`];
     this.valuePrev="class";
     return this;
   },
@@ -413,7 +416,7 @@ const cssSelectorBuilder = {
     if(this.valuePrev === "pseudoClass"){
       this.selThrow();
     }
-    Object.hasOwn(this,'_attr') ? this._attr.push(`[${value}]`): this._attr=[`[${value}]`];
+    Object.hasOwn(this.memory,'_attr') ? this.memory._attr.push(`[${value}]`): this.memory._attr=[`[${value}]`];
     this.valuePrev="attr";
     return this;
   },
@@ -422,7 +425,7 @@ const cssSelectorBuilder = {
     if(this.valuePrev === "pseudoElement"){
       this.selThrow();
     }
-    Object.hasOwn(this,'_pseudoClass') ? this._pseudoClass.push(`:${value}`): this._pseudoClass=[`:${value}`];
+    Object.hasOwn(this.memory,'_pseudoClass') ? this.memory._pseudoClass.push(`:${value}`): this.memory._pseudoClass=[`:${value}`];
     this.valuePrev="pseudoClass";
     return this;
   },
@@ -431,27 +434,38 @@ const cssSelectorBuilder = {
     if(this.valuePrev === "pseudoElement"){
       this.elemThrow();
     }
-    this._pseudoElement=[`::${value}`];
+    this.memory._pseudoElement=[`::${value}`];
     this.valuePrev ="pseudoElement";
     return this;
   },
 
-  combine(/* selector1, combinator, selector2 */) {
-    throw new Error('Not implemented');
+  combine(selector1, combinator, selector2) {
+    this._str= `${selector1}${combinator}${selector2}`;
+    return this;
   },
 
   stringify(){
     const arrayValues= [];
-    Object.entries(this).forEach(([key,value])=>{
-      if (typeof value !== "function" && value!==null && key!=="valuePrev"){
-        console.log(value);
-        arrayValues.push(value.join(''));
-        delete this[key];
-      }
+    Object.entries(this.memory).forEach(([key,value])=>{
+      // if (typeof value !== "function" && value!==null && key!=="valuePrev"){
+        console.log(key,value);
+        arrayValues.push( value);
+        delete this.memory[key];
+      // }
     });
     this.valuePrev=null;
-    const result = arrayValues.join('');
+    const result = this._str ?? arrayValues.join('');
+    this._str =null;
     return result;
+  },
+  toString(){
+    return [
+    this.memory._element || "",
+    this.memory._id || "",
+    this.memory._class ? this.memory._class.join("") : "",
+    this.memory._attr ? this.memory._attr.join("") : "",
+    this.memory._pseudoClass ? this.memory._pseudoClass.join("") : "",
+    this.memory._pseudoElement || ""].join('');
   }
 };
 
