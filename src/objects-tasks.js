@@ -18,7 +18,9 @@
  *    shallowCopy({}) => {}
  */
 function shallowCopy(obj) {
-  return Object.assign({},obj);
+  const copied = {};
+  Object.assign(copied, obj);
+  return copied;
 }
 
 /**
@@ -33,20 +35,20 @@ function shallowCopy(obj) {
  *    mergeObjects([]) => {}
  */
 function mergeObjects(objects) {
-  if(objects.length===0){
+  if (objects.length === 0) {
     return {};
   }
-   const merged = Object.assign({},objects[0]);
-  if(objects.length===1){
+  const merged = { ...objects[0] };
+  if (objects.length === 1) {
     return merged;
   }
-  Object.entries(objects[1]).forEach(([key,value])=>{
-    if(Object.hasOwn(merged,key)){
-      merged[key]= merged[key]+value;
-    }else{
-      merged[key]= value;
+  Object.entries(objects[1]).forEach(([key, value]) => {
+    if (Object.hasOwn(merged, key)) {
+      merged[key] += value;
+    } else {
+      merged[key] = value;
     }
-  })
+  });
   return merged;
 }
 
@@ -64,11 +66,11 @@ function mergeObjects(objects) {
  *
  */
 function removeProperties(obj, keys) {
-  Object.keys(obj).forEach(key=>{
-    if(keys.includes(key)){
+  Object.keys(obj).forEach((key) => {
+    if (keys.includes(key)) {
       delete obj[key];
     }
-  })
+  });
   return obj;
 }
 
@@ -85,12 +87,12 @@ function removeProperties(obj, keys) {
  *    compareObjects({a: 1, b: 2}, {a: 1, b: 3}) => false
  */
 function compareObjects(obj1, obj2) {
-   for(const key in obj1){
-    if(obj1[key]!==obj2[key]){
+  for (const key in obj1) {
+    if (obj1[key] !== obj2[key]) {
       return false;
     }
-   }
-   return true;
+  }
+  return true;
 }
 
 /**
@@ -139,14 +141,14 @@ function makeImmutable(obj) {
  *    makeWord({ H:[0], e: [1], l: [2, 3, 8], o: [4, 6], W:[5], r:[7], d:[9]}) => 'HelloWorld'
  */
 function makeWord(lettersObject) {
-  if(Object.keys(lettersObject).length===0){
-    return "";
+  if (Object.keys(lettersObject).length === 0) {
+    return '';
   }
   const flatValues = Object.values(lettersObject).flatMap((x) => x);
-  let array = Array({ length: Math.max(...flatValues) });
+  const array = Array({ length: Math.max(...flatValues) });
 
-  Object.entries(lettersObject).forEach(([letter,positions])=>{
-    positions.forEach(position=>array[position]=letter);
+  Object.entries(lettersObject).forEach(([letter, positions]) => {
+    positions.forEach((position) => (array[position] = letter));
   });
   return array.join('');
 }
@@ -166,43 +168,49 @@ function makeWord(lettersObject) {
  *    sellTickets([25, 100]) => false (The seller does not have enough money to give change.)
  */
 function sellTickets(queue) {
-  const moneyCash = {"25":0,"50":0,"100":0};
-  const ticketCost="25";
+  const moneyCash = { 25: 0, 50: 0, 100: 0 };
+  const ticketCost = '25';
   let result = true;
-if(queue[0]>ticketCost){
-  return false;
-}
-  for (let op=0; op<queue.length; op++) {
+  if (queue[0] > ticketCost) {
+    return false;
+  }
+  for (let op = 0; op < queue.length; op += 1) {
     const pay = queue[op].toString();
-    if(op===0&& pay===ticketCost){
-moneyCash[pay]=moneyCash[pay]+1;
-    }else{
-        if( pay==="25") {moneyCash[pay]=moneyCash[pay]+1;}
-          if(pay=== "50") {if (moneyCash["25"]===0) { result=false; break }else{moneyCash["25"]=moneyCash["25"]-1; moneyCash["50"]=moneyCash["50"]+1;} };
-          if(pay=== "100") {
-            if (moneyCash["50"] === 0) {
-              if (moneyCash["25"] < 3) {
-                result=false;
-                break ;
-              } else {
-                if (moneyCash["25"] >= 3) {
-                  moneyCash["25"] = moneyCash["25"] - 3;
-                  moneyCash["100"] = moneyCash["100"] + 1;
-                }
-              }
-            }else{
-              if (moneyCash["25"]<1) {
-                result=false;
-                break ;
-            }else{
-              moneyCash["50"]=moneyCash["50"]-1;
-              moneyCash["25"]=moneyCash["25"]-2;
-            }
+    if (op === 0 && pay === ticketCost) {
+      moneyCash[pay] += 1;
+    } else {
+      if (pay === '25') {
+        moneyCash[pay] += 1;
+      }
+      if (pay === '50') {
+        if (moneyCash['25'] === 0) {
+          result = false;
+          break;
+        } else {
+          moneyCash['25'] -= 1;
+          moneyCash['50'] += 1;
+        }
+      }
+      if (pay === '100') {
+        if (moneyCash['50'] === 0) {
+          if (moneyCash['25'] < 3) {
+            result = false;
+            break;
+          } else if (moneyCash['25'] >= 3) {
+            moneyCash['25'] -= 3;
+            moneyCash['100'] += 1;
           }
+        } else if (moneyCash['25'] < 1) {
+          result = false;
+          break;
+        } else {
+          moneyCash['50'] -= 1;
+          moneyCash['25'] -= 2;
+        }
+      }
     }
   }
-}
-return result;
+  return result;
 }
 
 /**
@@ -219,9 +227,11 @@ return result;
  *    console.log(r.getArea());   // => 200
  */
 function Rectangle(width, height) {
-  this.width=width;
- this.height=height
-  this.getArea =() =>{return this.width*this.height};
+  this.width = width;
+  this.height = height;
+  this.getArea = () => {
+    return this.width * this.height;
+  };
 }
 
 /**
@@ -251,7 +261,7 @@ function getJSON(obj) {
  */
 function fromJSON(proto, json) {
   const parsed = JSON.parse(json);
-  Object.setPrototypeOf(parsed,proto);
+  Object.setPrototypeOf(parsed, proto);
   return parsed;
 }
 
@@ -283,11 +293,17 @@ function fromJSON(proto, json) {
  */
 function sortCitiesArray(arr) {
   const comparator = (a, b) => {
-    return a.toLowerCase() < b.toLowerCase() ? -1 :
-     a.toLowerCase() > b.toLowerCase() ? 1 : 0;
+    return a.toLowerCase() < b.toLowerCase()
+      ? -1
+      : a.toLowerCase() > b.toLowerCase()
+      ? 1
+      : 0;
   };
-  const sorted = arr.sort((obj1,obj2)=>comparator(obj1.country, obj2.country))
-  .sort((obj1,obj2)=> obj1.country===obj2.country ? comparator(obj1.city, obj2.city) : 0);
+  const sorted = arr
+    .sort((obj1, obj2) => comparator(obj1.country, obj2.country))
+    .sort((obj1, obj2) =>
+      obj1.country === obj2.country ? comparator(obj1.city, obj2.city) : 0
+    );
   return sorted;
 }
 
@@ -328,9 +344,11 @@ function group(array, keySelector, valueSelector) {
   };
 
   array.forEach((object) => {
-    const country = extractor(object,keySelector);
-    const city = extractor(object,valueSelector);
-    multiMap.has(country) ? multiMap.get(country).push(city) : multiMap.set(country,[city]);
+    const country = extractor(object, keySelector);
+    const city = extractor(object, valueSelector);
+    multiMap.has(country)
+      ? multiMap.get(country).push(city)
+      : multiMap.set(country, [city]);
   });
   return Array.from(multiMap);
 }
@@ -390,99 +408,113 @@ function group(array, keySelector, valueSelector) {
  */
 
 const cssSelectorBuilder = {
-  elemThrow(){throw Error("Element, id and pseudo-element should not occur more then one time inside the selector")},
-  selThrow(){throw  Error("Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element")},
-  memory:{},
-  _str: null,
+  elemThrow() {
+    throw Error(
+      'Element, id and pseudo-element should not occur more then one time inside the selector'
+    );
+  },
+  selThrow() {
+    throw Error(
+      'Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element'
+    );
+  },
+  memory: {},
+  str: null,
 
   element(value) {
-    if(this.valuePrev === "element"){
+    if (this.valuePrev === 'element') {
       this.elemThrow();
     }
-    if(this.valuePrev === "id"||this.valuePrev=== "pseudoElement"){
+    if (this.valuePrev === 'id' || this.valuePrev === 'pseudoElement') {
       this.selThrow();
     }
-    this.memory._element=[`${value}`];
-    this.valuePrev="element";
+    this.memory.element = [`${value}`];
+    this.valuePrev = 'element';
     return this;
   },
 
   id(value) {
-    if(this.valuePrev === "id"){
+    if (this.valuePrev === 'id') {
       this.elemThrow();
     }
-    if(this.valuePrev === "class"||this.valuePrev==="pseudoElement"){
+    if (this.valuePrev === 'class' || this.valuePrev === 'pseudoElement') {
       this.selThrow();
     }
-    this.memory._id=[`#${value}`];
-    this.valuePrev="id";
+    this.memory.id = [`#${value}`];
+    this.valuePrev = 'id';
     return this;
   },
 
   class(value) {
-    if(this.valuePrev === "attr"){
+    if (this.valuePrev === 'attr') {
       this.selThrow();
     }
-    Object.hasOwn(this.memory,'_class') ? this.memory._class.push(`.${value}`): this.memory._class=[`.${value}`];
-    this.valuePrev="class";
+    this.memory.class
+      ? this.memory.class.push(`.${value}`)
+      : (this.memory.class = [`.${value}`]);
+    this.valuePrev = 'class';
     return this;
   },
 
   attr(value) {
-    if(this.valuePrev === "pseudoClass"){
+    if (this.valuePrev === 'pseudoClass') {
       this.selThrow();
     }
-    Object.hasOwn(this.memory,'_attr') ? this.memory._attr.push(`[${value}]`): this.memory._attr=[`[${value}]`];
-    this.valuePrev="attr";
+    this.memory.attr
+      ? this.memory.attr.push(`[${value}]`)
+      : (this.memory.attr = [`[${value}]`]);
+    this.valuePrev = 'attr';
     return this;
   },
 
   pseudoClass(value) {
-    if(this.valuePrev === "pseudoElement"){
+    if (this.valuePrev === 'pseudoElement') {
       this.selThrow();
     }
-    Object.hasOwn(this.memory,'_pseudoClass') ? this.memory._pseudoClass.push(`:${value}`): this.memory._pseudoClass=[`:${value}`];
-    this.valuePrev="pseudoClass";
+    this.memory.pseudoClass
+      ? this.memory.pseudoClass.push(`:${value}`)
+      : (this.memory.pseudoClass = [`:${value}`]);
+    this.valuePrev = 'pseudoClass';
     return this;
   },
 
   pseudoElement(value) {
-    if(this.valuePrev === "pseudoElement"){
+    if (this.valuePrev === 'pseudoElement') {
       this.elemThrow();
     }
-    this.memory._pseudoElement=[`::${value}`];
-    this.valuePrev ="pseudoElement";
+    this.memory.pseudoElement = [`::${value}`];
+    this.valuePrev = 'pseudoElement';
     return this;
   },
 
   combine(selector1, combinator, selector2) {
-    this._str= `${selector1}${combinator}${selector2}`;
+    this.str = `${selector1}${combinator}${selector2}`;
     return this;
   },
 
-  stringify(){
-    const arrayValues= [];
-    Object.entries(this.memory).forEach(([key,value])=>{
+  stringify() {
+    const arrayValues = [];
+    Object.entries(this.memory).forEach(([key, value]) => {
       // if (typeof value !== "function" && value!==null && key!=="valuePrev"){
-        console.log(key,value);
-        arrayValues.push( value);
-        delete this.memory[key];
+      arrayValues.push(value);
+      delete this.memory[key];
       // }
     });
-    this.valuePrev=null;
-    const result = this._str ?? arrayValues.join('');
-    this._str =null;
+    this.valuePrev = null;
+    const result = this.str ?? arrayValues.join('');
+    this.str = null;
     return result;
   },
-  toString(){
+  toString() {
     return [
-    this.memory._element || "",
-    this.memory._id || "",
-    this.memory._class ? this.memory._class.join("") : "",
-    this.memory._attr ? this.memory._attr.join("") : "",
-    this.memory._pseudoClass ? this.memory._pseudoClass.join("") : "",
-    this.memory._pseudoElement || ""].join('');
-  }
+      this.memory.element || '',
+      this.memory.id || '',
+      this.memory.class ? this.memory.class.join('') : '',
+      this.memory.attr ? this.memory.attr.join('') : '',
+      this.memory.pseudoClass ? this.memory.pseudoClass.join('') : '',
+      this.memory.pseudoElement || '',
+    ].join('');
+  },
 };
 
 module.exports = {
