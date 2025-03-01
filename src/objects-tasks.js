@@ -66,12 +66,13 @@ function mergeObjects(objects) {
  *
  */
 function removeProperties(obj, keys) {
-  Object.keys(obj).forEach((key) => {
+  const modified = obj;
+  Object.keys(modified).forEach((key) => {
     if (keys.includes(key)) {
-      delete obj[key];
+      delete modified[key];
     }
   });
-  return obj;
+  return modified;
 }
 
 /**
@@ -87,12 +88,8 @@ function removeProperties(obj, keys) {
  *    compareObjects({a: 1, b: 2}, {a: 1, b: 3}) => false
  */
 function compareObjects(obj1, obj2) {
-  for (const key in obj1) {
-    if (obj1[key] !== obj2[key]) {
-      return false;
-    }
-  }
-  return true;
+  const keys = Object.keys(obj1);
+  return keys.every((key) => obj1[key] === obj2[key]);
 }
 
 /**
@@ -148,7 +145,10 @@ function makeWord(lettersObject) {
   const array = Array({ length: Math.max(...flatValues) });
 
   Object.entries(lettersObject).forEach(([letter, positions]) => {
-    positions.forEach((position) => (array[position] = letter));
+    positions.forEach((position) => {
+      array[position] = letter;
+      return true;
+    });
   });
   return array.join('');
 }
@@ -295,9 +295,7 @@ function sortCitiesArray(arr) {
   const comparator = (a, b) => {
     return a.toLowerCase() < b.toLowerCase()
       ? -1
-      : a.toLowerCase() > b.toLowerCase()
-      ? 1
-      : 0;
+      : a.toLowerCase() > b.toLowerCase();
   };
   const sorted = arr
     .sort((obj1, obj2) => comparator(obj1.country, obj2.country))
@@ -346,9 +344,11 @@ function group(array, keySelector, valueSelector) {
   array.forEach((object) => {
     const country = extractor(object, keySelector);
     const city = extractor(object, valueSelector);
-    multiMap.has(country)
-      ? multiMap.get(country).push(city)
-      : multiMap.set(country, [city]);
+    if (multiMap.has(country)) {
+      multiMap.get(country).push(city);
+    } else {
+      multiMap.set(country, [city]);
+    }
   });
   return Array.from(multiMap);
 }
@@ -449,9 +449,11 @@ const cssSelectorBuilder = {
     if (this.valuePrev === 'attr') {
       this.selThrow();
     }
-    this.memory.class
-      ? this.memory.class.push(`.${value}`)
-      : (this.memory.class = [`.${value}`]);
+    if (this.memory.class) {
+      this.memory.class.push(`.${value}`);
+    } else {
+      this.memory.class = [`.${value}`];
+    }
     this.valuePrev = 'class';
     return this;
   },
@@ -460,9 +462,11 @@ const cssSelectorBuilder = {
     if (this.valuePrev === 'pseudoClass') {
       this.selThrow();
     }
-    this.memory.attr
-      ? this.memory.attr.push(`[${value}]`)
-      : (this.memory.attr = [`[${value}]`]);
+    if (this.memory.attr) {
+      this.memory.attr.push(`[${value}]`);
+    } else {
+      this.memory.attr = [`[${value}]`];
+    }
     this.valuePrev = 'attr';
     return this;
   },
@@ -471,9 +475,11 @@ const cssSelectorBuilder = {
     if (this.valuePrev === 'pseudoElement') {
       this.selThrow();
     }
-    this.memory.pseudoClass
-      ? this.memory.pseudoClass.push(`:${value}`)
-      : (this.memory.pseudoClass = [`:${value}`]);
+    if (this.memory.pseudoClass) {
+      this.memory.pseudoClass.push(`:${value}`);
+    } else {
+      this.memory.pseudoClass = [`:${value}`];
+    }
     this.valuePrev = 'pseudoClass';
     return this;
   },
