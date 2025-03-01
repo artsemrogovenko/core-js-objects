@@ -428,9 +428,10 @@ const cssSelectorBuilder = {
     if (this.valuePrev === 'id' || this.valuePrev === 'pseudoElement') {
       this.selThrow();
     }
-    this.memory.element = [`${value}`];
-    this.valuePrev = 'element';
-    return this;
+    const obj = this.createCopy();
+    obj.memory.element = [`${value}`];
+    obj.valuePrev = 'element';
+    return obj;
   },
 
   id(value) {
@@ -440,69 +441,90 @@ const cssSelectorBuilder = {
     if (this.valuePrev === 'class' || this.valuePrev === 'pseudoElement') {
       this.selThrow();
     }
-    this.memory.id = [`#${value}`];
-    this.valuePrev = 'id';
-    return this;
+    const obj = this.createCopy();
+    obj.memory.id = [`#${value}`];
+    obj.valuePrev = 'id';
+    return obj;
   },
 
   class(value) {
     if (this.valuePrev === 'attr') {
       this.selThrow();
     }
-    if (this.memory.class) {
-      this.memory.class.push(`.${value}`);
+    const obj = this.createCopy();
+
+    if (obj.memory.class) {
+      obj.memory.class.push(`.${value}`);
     } else {
-      this.memory.class = [`.${value}`];
+      obj.memory.class = [`.${value}`];
     }
-    this.valuePrev = 'class';
-    return this;
+    obj.valuePrev = 'class';
+    return obj;
   },
 
   attr(value) {
     if (this.valuePrev === 'pseudoClass') {
       this.selThrow();
     }
-    if (this.memory.attr) {
-      this.memory.attr.push(`[${value}]`);
+    const obj = this.createCopy();
+
+    if (obj.memory.attr) {
+      obj.memory.attr.push(`[${value}]`);
     } else {
-      this.memory.attr = [`[${value}]`];
+      obj.memory.attr = [`[${value}]`];
     }
-    this.valuePrev = 'attr';
-    return this;
+    obj.valuePrev = 'attr';
+    return obj;
   },
 
   pseudoClass(value) {
     if (this.valuePrev === 'pseudoElement') {
       this.selThrow();
     }
-    if (this.memory.pseudoClass) {
-      this.memory.pseudoClass.push(`:${value}`);
+    const obj = this.createCopy();
+
+    if (obj.memory.pseudoClass) {
+      obj.memory.pseudoClass.push(`:${value}`);
     } else {
-      this.memory.pseudoClass = [`:${value}`];
+      obj.memory.pseudoClass = [`:${value}`];
     }
-    this.valuePrev = 'pseudoClass';
-    return this;
+    obj.valuePrev = 'pseudoClass';
+    return obj;
   },
 
   pseudoElement(value) {
     if (this.valuePrev === 'pseudoElement') {
       this.elemThrow();
     }
-    this.memory.pseudoElement = [`::${value}`];
-    this.valuePrev = 'pseudoElement';
-    return this;
+    const obj = this.createCopy();
+    obj.memory.pseudoElement = [`::${value}`];
+    obj.valuePrev = 'pseudoElement';
+    return obj;
   },
 
   combine(selector1, combinator, selector2) {
-    this.str = `${selector1}${combinator}${selector2}`;
-    return this;
+    const obj = this.createCopy();
+    obj.str = `${selector1.stringify()} ${combinator} ${selector2.stringify()}`;
+    return obj;
+  },
+
+  createCopy() {
+    return Object.assign(Object.create(cssSelectorBuilder), {
+      memory: { ...this.memory },
+      valuePrev: this.valuePrev,
+      str: null,
+    });
   },
 
   stringify() {
     const arrayValues = [];
     Object.entries(this.memory).forEach(([key, value]) => {
       // if (typeof value !== "function" && value!==null && key!=="valuePrev"){
-      arrayValues.push(value);
+      if (Array.isArray(value)) {
+        arrayValues.push(value.join(''));
+      } else {
+        arrayValues.push(value);
+      }
       delete this.memory[key];
       // }
     });
